@@ -1,0 +1,77 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use WORK.text_pkg.ALL;
+
+entity scroller_disp is
+    generic (
+        COLS       : integer := 12;
+        ROWS       : integer := 8;
+        COLOR_NBR  : integer := 3;
+        STR_LENGTH : integer := 24
+    );
+    port (
+        clk_0       : in  std_logic;  -- pixel refresh clock
+        clk_1       : in  std_logic;  -- scroll clock
+        LED_COLOR   : in  std_logic_vector(2 downto 0);
+        LED_SEL_Cn  : out bit_vector(0 to COLS-1);
+        LED_SEL_R   : out bit_vector(7 downto 0);
+        LED_SEL_G   : out bit_vector(7 downto 0);
+        LED_SEL_B   : out bit_vector(7 downto 0);
+        LED_Reset   : out bit
+    );
+end entity scroller_disp;
+
+architecture rtl of scroller_disp is
+    signal colm     : bit_vector(COLS-1 downto 0) := (others => '1');
+    signal col      : cor := (others => X"00");
+    signal nbr      : bit_vector(ROWS-1 downto 0) := (others => '0');
+    signal buffer_0 : pixel_data := (others => X"00");
+begin
+    LED_SEL_Cn <= colm;
+    LED_SEL_R  <= col(2);
+    LED_SEL_G  <= col(1);
+    LED_SEL_B  <= col(0);
+    LED_Reset  <= '0';
+
+    -- Column multiplexing / pixel refresh
+    disp : process(clk_0)
+        variable cnt_0, prev : natural range 0 to COLS-1 := 0;
+    begin
+        if rising_edge(clk_0) then
+            nbr <= buffer_0(COLS-1 - cnt_0);
+            colm(prev) <= '1';
+            colm(cnt_0) <= '0';
+            for i in 2 downto LED_COLOR'low loop
+                if LED_COLOR(i) = '0' then
+                    col(i) <= nbr;
+                else
+                    col(i) <= (others => '0');
+                end if;
+            end loop;
+            prev := cnt_0;
+            if cnt_0 = COLS-1 then
+                cnt_0 := 0;
+            else
+                cnt_0 := cnt_0 + 1;
+            end if;
+        end if;
+    end process;
+
+    -- Scrolling shift register
+    scroll : process(clk_1)
+        variable cnt_1 : natural range 0 to STR_LENGTH-1 := 0;
+    begin
+        if rising_edge(clk_1) then
+            for i in 0 to COLS-2 loop
+                buffer_0(i+1) <= buffer_0(i);
+            end loop;
+            buffer_0(0) <= labels(STR_LENGTH - 1 - cnt_1);
+            if cnt_1 = STR_LENGTH - 1 then
+                cnt_1 := 0;
+            else
+                cnt_1 := cnt_1 + 1;
+            end if;
+        end if;
+    end process;
+end architecture rtl;
