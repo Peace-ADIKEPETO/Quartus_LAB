@@ -103,7 +103,7 @@ Each byte is one column, with the most significant bit as the top row. Each lett
 | Expansion | EPFL/LAP `ExtDE0_LedSW` shield |
 | Power and programming | USB mini-AB (5 V), USB-Blaster |
 
-![Hardware setup](docs/hardware.png)
+![Hardware setup](docs/hardware.jpg)
 
 **Software**
 
@@ -209,6 +209,7 @@ quartus_lab/
 **Peace ADIKPETO**
 Teaching Assistant, EPAC
 peaceadikpeto@gmail.com
+
 **KIKI Probus A. F. M.**
 Supervisor, Main-Lecturer, PhD, EPAC
 
